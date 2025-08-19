@@ -5,9 +5,9 @@ function analog = io_loadanalog(analogtxt_directory)
         % Header: 2 lines, Info struct: 9 lines, and n lines for each n channels of analog channel
     % Output: analog struct
     % This function read analog.txt file generated from mdfExtracter with two headers
-    % 1. info header start from --- Analog Info
+    % 1. header start from --- Analog Info
     % 1.1 info struct reconstruct from ':' as deliminator and left side as field name right side as value
-    % 2. data header start from --- Analog Data
+    % 2. data start from --- Analog Data
     % 2.1 data struct reconstruct from ':' as deliminator
     % Open the file
             fileid = fopen(analogtxt_directory, 'r');
