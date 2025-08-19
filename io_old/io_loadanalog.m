@@ -22,6 +22,7 @@ function analog = io_loadanalog(analogtxt_directory)
             
             % Read header information
             section = 'header'; % Track which section we are in
+            % wait bar
             while ~feof(fileid)
                 line = strtrim(fgetl(fileid)); % Read line and trim whitespace
                 
@@ -36,6 +37,7 @@ function analog = io_loadanalog(analogtxt_directory)
         
                 % Process header info
                 if strcmp(section, 'header') && contains(line, ':')
+                    disp('Analog info loading')
                     tokens = split(line, ':'); % Split by colon
                     key = strtrim(tokens{1}); 
                     value = strtrim(tokens{2});
@@ -45,6 +47,7 @@ function analog = io_loadanalog(analogtxt_directory)
         
                 % Process data section
                 if strcmp(section, 'data') && contains(line, ':')
+                    disp('Analog data loading')
                     tokens = split(line, ':'); % Split by colon
                     key = strtrim(tokens{1}); 
                     value = strtrim(tokens{2});
