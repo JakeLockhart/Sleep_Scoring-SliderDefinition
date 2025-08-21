@@ -13,8 +13,7 @@ function raw_sleepscoringdata = io_main(mdfExtract_folderpath)
     raw_sleepscoringdata.analog = io_loadanalog(path_struct.analog);
     raw_sleepscoringdata.eye = io_loadavi(path_struct.eye);
     raw_sleepscoringdata.whisker = io_loadavi(path_struct.whisker);
-
-
+    raw_sleepscoringdata.info = io_loadinfo_hl(path_struct.info);
 end
 function matchedpath = pathfinder(folder_path, name_pattern)
     dirstruct = dir(fullfile(folder_path, name_pattern));
