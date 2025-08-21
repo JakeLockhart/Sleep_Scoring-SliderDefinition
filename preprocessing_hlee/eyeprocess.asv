@@ -1,0 +1,52 @@
+% this script is to measure the pupil size based on thresholding method, to
+% 1. choose roi
+% 2. mask image
+% 3. get top 10% and bottom 10% values for each slice
+% 4. cut the threshold at various range 1%~5% and sum it
+% 5. median filter and gauss filter (2d) for stable thresholding
+% 6. summation of logical array
+
+eye = io_loadavi('G:\tmp\05_bi30\hql083\250715_hql083_sleep\HQL083_sleep250715_006\eye.avi');
+% 1. choose roi
+%%
+behavior_roilist = roi(eye,'eye2','line');
+%%
+behavior_roilist = behavior_roilist.modifyroi(eye,'eye');
+%%
+
+figure()
+sliceViewer(eye)
+%%
+drawpolygon()
+drawline()
+%%
+% 2. make mask
+masked_eye = roi_applymask(eye, behavior_roilist.mask.eye);
+%% 3. normalize the image
+norm_eye = zeros(size(masked_eye));
+
+for k = 1:N
+    sli = masked_eye(:,:,k);
+    v = sli(~isnan(sli));        
+    if isempty(v), continue; end
+    pr = prctile(v, [1 99]);  
+    norm_eye(:,:,k) = mat2gray(sli ,[pr(1) pr(2)]);
+end
+
+bweye = uint8(norm_eye<0.05);
+for thr = 0.01:0.01:0.05
+    bweye = bweye + uint8(norm_eye<thr);
+end
+
+bweye_med = medfilt3(bweye,[5 5 11]);
+bweye_gauss = imgaussfilt(bweye_med,1);
+thr_bweyemed = bweye_gauss>1;
+pupil_area = squeeze(sum(thr_bweyemed,[1,2]));
+%%
+util_checkstack(bwe)
+%%
+taxis = linspace(0,1800,N);
+%%
+
+figure()
+plot(taxis,pupil_area)
