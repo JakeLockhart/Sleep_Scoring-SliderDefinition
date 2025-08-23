@@ -1,0 +1,45 @@
+multisessionfolder_directory = 'C:\Users\hql5715\Downloads\INPUT DATA - ALREADY PROCESSED'; 
+%%
+raw_dir = dir(fullfile(multisessionfolder_directory,'*_RawData.mat'));
+%%
+struct_blueprint = struct(...
+    'fileid',[], ...
+    'animalID',[], ...
+    'sessionID',[], ...
+    'analogSamplingRate',[], ...
+    'whiskCamSamplingRate',[], ...
+    'pupilCamSamplingRate',[], ...
+    'cortical_LH', [], ...
+    'EMG', [], ...
+    'forceSensor', [], ...
+    'pupilDiameter', [], ...
+    'whiskerAngle', [], ...
+    'filepath', []);
+%%
+n_session = numel(raw_dir);
+sleepscore_rawdatastruct = repmat(struct_blueprint,1,n_session);
+
+%% from here loop is necessary
+fileid = strsplit(raw_dir(session_idx).name,'_');
+fileid = strjoin(fileid(1:end-1),'_');
+%%
+
+%%
+for session_idx = 1:n_session
+    fprintf
+    filepath = fullfile(raw_dir(session_idx).folder,raw_dir(session_idx).name);
+    sleepscore_rawdatastruct(session_idx).filepath = filepath;
+    tmp.loadstruct = load(filepath);
+    raw_data = tmp.loadstruct.RawData;
+    sleepscore_rawdatastruct(session_idx).fileid = fileid;
+    sleepscore_rawdatastruct(session_idx).animalID = raw_data.notes.animalID;
+    sleepscore_rawdatastruct(session_idx).sessionID = raw_data.notes.sessionID;
+    sleepscore_rawdatastruct(session_idx).analogSamplingRate = raw_data.notes.analogSamplingRate;
+    sleepscore_rawdatastruct(session_idx).whiskCamSamplingRate = raw_data.notes.whiskCamSamplingRate;
+    sleepscore_rawdatastruct(session_idx).pupilCamSamplingRate = raw_data.notes.pupilCamSamplingRate;
+    sleepscore_rawdatastruct(session_idx).cortical_LH = raw_data.data.cortical_LH;
+    sleepscore_rawdatastruct(session_idx).EMG = raw_data.data.EMG;
+    sleepscore_rawdatastruct(session_idx).forceSensor = raw_data.data.forceSensor;
+    sleepscore_rawdatastruct(session_idx).pupilDiameter = raw_data.data.pupilDiameter;
+    sleepscore_rawdatastruct(session_idx).whiskerAngle = raw_data.data.whiskerAngle;
+end
