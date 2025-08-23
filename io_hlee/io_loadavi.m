@@ -36,8 +36,6 @@ function [frames, fps] = io_loadavi(avidirectory)
         frames = zeros(H,W,nEst,'uint8');
         frames(:,:,1) = firstFrame;
 
-        h = waitbar(0, sprintf('Loading .avi from %s...', fpath));
-
         % Read frames, update waitbar every 5%
         k = 1;
         pctNext = 5;
@@ -54,13 +52,12 @@ function [frames, fps] = io_loadavi(avidirectory)
             % update waitbar
             pct = floor((k / nEst) * 100);
             if pct >= pctNext
-                waitbar(pct/100, h);
+                 fprintf('\r[%s] Progress: %3d%%', tag, min(pct,100));
                 pctNext = pctNext + 5;
             end
         end
 
         fprintf('\r[%s] Done. %d frames @ %.3f fps\n', tag, k, fps);
-
     catch ME
         warning('Failed to read %s: %s', tag, ME.message);
         frames = [];
