@@ -1,21 +1,60 @@
-function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
+function SegmentedSleepStates = UI_SleepScoring(Data)
     % <Documentation>
         % SleepScoring()
-        %   
+        %   Interactive UI app for manually scoring sleep states with multimodal data.
         %   Created by: jsl5865
         %   
         % Syntax:
+        %   SegmentedSleepStates = UI_SleepScoring(Data)
         %   
         % Description:
+        %   This function provides a graphical user interface (GUI) to inspect and define sleep
+        %       states based on multimodal physiological data (EEG, EMG, Force, ECOG, Whisker, 
+        %       Pupil, etc.).
+        %   Additional sleep states can be added by simply appending to the ArousalStateList 
+        %       variable. Currently the following states are provided as default:
+        %           - Awake
+        %           - Rapid Eye Movement (REM)
+        %           - Non-Rapid Eye Movement (NREM)
+        %   To define sleep states, use the mouse to drag the red x-line to the end of an arousal
+        %       state. When a region is defined the GUI is updated with a sleep state based on the
+        %       button (or key) pressed which is shown via both a color and a dotted x-line.
+        %   500 second intervals are displayed to improve accuracy. The scroll wheel on a mouse
+        %       is used to control the interval displayed by adjusting the x-limit of the plotted
+        %       data.
+        %           - Scroll ↑ to advance through data
+        %           - Scroll ↓ to rewind through data
+        %   Keyboard shortcuts:
+        %       - 'r' used to reset x-limits to display entire sleep data series. Simply adjust the
+        %         scroll wheel to re-adjust the x-limits   
+        %   Note that the input to this function must be in the form of Data.(Sensor). Currently the
+        %       following sensors can be input within the Data structure. The order does not matter, 
+        %       neither does excluding some sensor types. Each of these modalities have a corresponding
+        %       plotting function called in the helper functions section of this code. To add an 
+        %       additional modality, the PlottingFunctions variable must be updated with the data type
+        %       and the corresponding plotting function.
+        %           - EEG
+        %           - EMG
+        %           - Force
+        %           - ECOG
+        %           - Whisker
+        %           - Pupil
         %   
         % Input:
+        %   Data - A structure containing one or more physiological signals. Each field should 
+        %          correspond to a modality (e.g., EEG, EMG, ECoG, etc.) and must include relevant 
+        %          time and signal data.        
         %   
         % Output:
+        %   SegementedSleepStates - A structure containing manually defined interavals for
+        %                           each arousal state. One field per arousal state containing
+        %                           arrays of [start, end] indices of each segement of the 
+        %                           region.
         %   
     % <End Documentation>
 
     %% Initialization
-        ArousalStateList = {"Awake", "REM", "NREM"};
+        ArousalStateList = {"Awake", "REM", "NREM", "MicroArousals", "Transition"};
 
         Colors = hsv(numel(ArousalStateList));
         ColorsHSV = rgb2hsv(Colors);
@@ -30,7 +69,9 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
         Fields = fieldnames(Data);
         ReferenceIndex = 1;
         ActiveIndex = 1;
-        MaxIndex = length(Data.(Fields{1}));
+        MaxIndex = max(Data.(Fields{1}).t);
+        SpanIndices = 500; 
+        CurrentSpan = SpanIndices/2;
 
         for i = 1:length(ArousalStateList)
             SegmentedSleepStates.(ArousalStateList{i}) = {};
@@ -65,18 +106,35 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
                     ActiveFunction = PlottingFunctions(Field);
                     ActiveFunction(ax(i), Data.(Field));
                 end
+            
+                xlim(ax(i), [1, SpanIndices]);
+
+                if length(fieldnames(Data.(Field))) < 3
+                    YData = get(ax(i).Children, 'YData');
+                    
+                    if iscell(YData)
+                        YData = cell2mat(YData(:));
+                    end
+
+                    YMin = min(YData);
+                    YMax = max(YData);
+                    Padding = 0.1*(YMax - YMin);
+                    
+                    ylim(ax(i), [YMin-Padding, YMax+Padding]);
+                end
             end
 
         %% Controls
             %% Define Region Interval (Slider)
                 hold(ax(:), 'on')
                 Slider = xline(ax(1), ReferenceIndex, 'r', 'LineWidth', 3, 'HitTest', 'on', 'PickableParts', 'all');
-                Tolerance = 10000;
+                Tolerance = 10;
                 ActiveDrag = false;
 
                 Window.WindowButtonMotionFcn = @SliderMotion;
                 Window.WindowButtonDownFcn = @StartMotion;
                 Window.WindowButtonUpFcn = @EndMotion;
+                Window.WindowScrollWheelFcn = @ScrollThroughData;
 
             %% Define Sleep State for Current Interval
                 StatePanel = uipanel(MainLayout, "Title", 'Define the current region');
@@ -107,7 +165,7 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
             end
 
             function Plot_EMG(ax,Data)
-                plot(ax, Data)
+                plot(ax, Data.t, Data.y)
                 axis(ax, 'tight')
                 title(ax, 'Testing Force')
                 xlabel(ax, 'time')
@@ -115,7 +173,7 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
             end
 
             function Plot_Force(ax, Data)
-                plot(ax, Data);
+                plot(ax, Data.t, Data.y);
                 axis(ax, 'tight')
                 title(ax, 'Testing Force')
                 xlabel(ax, 'time')
@@ -138,6 +196,8 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
                     switch event.Key
                         case 'escape'    % Saves regions and close window
                             CloseWindow();
+                        case 'r'
+                            ReviewScoring(); 
                     end
                 end
 
@@ -145,6 +205,28 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
                     if isvalid(Window)
                         uiresume(Window)
                         delete(Window)
+                    end
+                end
+
+                function ReviewScoring
+                    xlim(ax(:), [1, MaxIndex]);
+                end
+
+            % Scroll wheel to move through data
+                function ScrollThroughData(~, event)
+                    SpanStep = 60;
+                    if event.VerticalScrollCount > 0
+                        CurrentSpan = max(1 + SpanIndices/2, CurrentSpan - SpanStep);
+                    else
+                        CurrentSpan = min(MaxIndex - SpanIndices/2, CurrentSpan + SpanStep);
+                    end
+
+                    Min_x = round(CurrentSpan - SpanIndices/2);
+                    Max_x = round(CurrentSpan + SpanIndices/2);
+                    Min_x = max(1, Min_x);
+                    Max_x = min(MaxIndex, Max_x);
+                    for k = 1:length(ax)
+                        xlim(ax(k), [Min_x, Max_x])
                     end
                 end
 
@@ -176,7 +258,6 @@ function [SegmentedSleepStates, ax] = UI_SleepScoring(Data)
                     CursorPosition = ax(1).CurrentPoint(1,1);
                     if ActiveDrag
                         CursorPosition = max(ReferenceIndex, min(MaxIndex, CursorPosition));
-                        % Slider.Value = CursorPosition;
                         for j = 1:length(Slider)
                             Slider(j).Value = CursorPosition;
                         end
