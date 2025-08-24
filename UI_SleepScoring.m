@@ -54,7 +54,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
     % <End Documentation>
 
     %% Initialization
-        ArousalStateList = {"Awake", "REM", "NREM", "MicroArousals", "Transition"};
+        ArousalStateList = {"Awake", "REM", "NREM"};
 
         Colors = hsv(numel(ArousalStateList));
         ColorsHSV = rgb2hsv(Colors);
