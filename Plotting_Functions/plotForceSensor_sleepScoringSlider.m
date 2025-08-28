@@ -19,7 +19,7 @@ p1 = plot((1:length(filtForceSensor))/ProcData.notes.dsFs,filtForceSensor,'Color
 title('Behavioral characterization and sleep scoring')
 ylabel('Force Sensor (V)')
 xlim([0,ProcData.notes.trialDuration_sec])
-legend((p1),'Force Sensor')
+legend((p1),'Force Sensor', Location='eastoutside')
 
 %optional
 set(gca,'TickLength',[0,0])
