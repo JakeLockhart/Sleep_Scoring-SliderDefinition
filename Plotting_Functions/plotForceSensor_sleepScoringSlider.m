@@ -15,7 +15,7 @@ filtForceSensor = filtfilt(sos1,g1,ProcData.data.forceSensor);
 
 %Make the plot 
 ax1 = subplot(7,1,1); %Just leaving seven as original bur probably this might change 
-p1 = plot((1:length(filtForceSensor))/ProcData.notes.dsFs,filtForceSensor,'Color', 'k','LineWidth',1);
+p1 = plot((1:length(filtForceSensor))/ProcData.notes.dsFs,filtForceSensor,'Color',[0.0 0.5216 0.2431],'LineWidth',1);
 title('Behavioral characterization and sleep scoring')
 ylabel('Force Sensor (V)')
 xlim([0,ProcData.notes.trialDuration_sec])
