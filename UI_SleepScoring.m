@@ -55,7 +55,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
     %% Initialization
         ArousalStateList = {"Awake", "REM", "NREM"};
-        ModalityList = {"ECOG", "EMG", "Force", "Pupil", "Spectogram", "Whisker"};
+        ModalityList = {'ECOG', 'EMG', 'Force', 'Pupil', 'Spectogram', 'Whisker'};
 
         SelectedModalities = listdlg("ListString", ModalityList, ...
                                      "SelectionMode", "multiple", ...
@@ -75,7 +75,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         Fields = ModalityList(SelectedModalities);
         ReferenceIndex = 1;
         ActiveIndex = 1;
-        MaxIndex = max(Data.(Fields{1}).t); %<-- UPDATE MAX LENGTH BASED ON FIRST MODALITY OPTION LENGTH
+        MaxIndex = Data.trialDuration_sec;
         SpanIndices = 500; 
         CurrentSpan = SpanIndices/2;
 
@@ -110,12 +110,12 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                 
                 if isKey(PlottingFunctions, Field)
                     ActiveFunction = PlottingFunctions(Field);
-                    ActiveFunction(ax(i), Data.(Field));
+                    ActiveFunction(ax(i), Data);
                 end
             
                 xlim(ax(i), [1, SpanIndices]);
 
-                if length(fieldnames(Data.(Field))) < 3
+                if length(fieldnames(Data)) < 3
                     YData = get(ax(i).Children, 'YData');
                     
                     if iscell(YData)
