@@ -237,10 +237,9 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                     end
 
                     ReferenceIndex = ActiveIndex;
-                    % Slider.Value = ReferenceIndex + 1;
-for j = 1:length(Slider)
-    Slider(j).Value = ReferenceIndex + 1;
-end
+                    for j = 1:length(Slider)
+                        Slider(j).Value = ReferenceIndex + 1;
+                    end
                 end
 
             % Xline motion 
