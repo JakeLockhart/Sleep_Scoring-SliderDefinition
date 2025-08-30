@@ -198,6 +198,11 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                             CloseWindow();
                         case 'r'
                             ReviewScoring(); 
+                        otherwise
+                            Key = str2double(event.Key);
+                            if ~isnan(Key) && 1 <= Key && Key <= length(ArousalStateList)
+                                DefineSleepRegion(ArousalStateList{Key}, ColorMap(Key, :));
+                            end  
                     end
                 end
 
