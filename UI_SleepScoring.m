@@ -55,6 +55,12 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
     %% Initialization
         ArousalStateList = {"Awake", "REM", "NREM"};
+        ModalityList = {"ECOG", "EMG", "Force", "Pupil", "Spectogram", "Whisker"};
+
+        SelectedModalities = listdlg("ListString", ModalityList, ...
+                                     "SelectionMode", "multiple", ...
+                                     "ListSize", [250, 100] ...
+                                    );
 
         Colors = hsv(numel(ArousalStateList));
         ColorsHSV = rgb2hsv(Colors);
@@ -62,14 +68,14 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         ColorsHSV(:,3) = 0.9;
         ColorMap = hsv2rgb(ColorsHSV);
 
-        PlottingFunctions = containers.Map({'EEG', 'EMG', 'Force', 'ECOG', 'Whisker', 'Pupil'}, ...
-                                           {@Plot_EEG, @Plot_EMG, @Plot_Force, @Plot_ECOG, @Plot_Whisker, @Plot_Pupil} ...
+        PlottingFunctions = containers.Map(ModalityList, ...
+                                           {@Plot_ECOG, @Plot_EMG, @Plot_Force, @Plot_Pupil, @Plot_Spectogram, @Plot_Whisker} ...
                                           );
 
-        Fields = fieldnames(Data);
+        Fields = ModalityList(SelectedModalities);
         ReferenceIndex = 1;
         ActiveIndex = 1;
-        MaxIndex = max(Data.(Fields{1}).t);
+        MaxIndex = max(Data.(Fields{1}).t); %<-- UPDATE MAX LENGTH BASED ON FIRST MODALITY OPTION LENGTH
         SpanIndices = 500; 
         CurrentSpan = SpanIndices/2;
 
@@ -159,37 +165,31 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         uiwait(Window);
 
     %% Helper Functions
-        %% Plotting functions
-            function Plot_EEG(ax,Data)
-                plot(ax, Data);
-            end
+        %% Plotting functions - {@Plot_ECOG, @Plot_EMG, @Plot_Force, @Plot_Pupil, @Plot_Spectogram, @Plot_Whisker}
+                function Plot_ECOG(ax, Data)
+                    plotECOG_sleepScoringSlider(ax, Data);
+                end
 
-            function Plot_EMG(ax,Data)
-                plot(ax, Data.t, Data.y)
-                axis(ax, 'tight')
-                title(ax, 'Testing Force')
-                xlabel(ax, 'time')
-                ylabel(ax, 'power')
-            end
+                function Plot_EMG(ax, Data)
+                    plotEMGPower_sleepScoringSlider(ax, Data);
+                end
 
-            function Plot_Force(ax, Data)
-                plot(ax, Data.t, Data.y);
-                axis(ax, 'tight')
-                title(ax, 'Testing Force')
-                xlabel(ax, 'time')
-                ylabel(ax, 'power')
-            end
+                function Plot_Force(ax, Data)
+                    plotForceSensor_sleepScoringSlider(ax, Data);
+                end
 
-            function Plot_ECOG(ax, Data)
-                imagesc(ax, Data.t, Data.f, Data.spectrum);
-                axis(ax, 'xy');
-                colormap(ax, 'jet');
-                colorbar(ax);
-                xlabel(ax, 'Time')
-                ylabel(ax, 'Frequency')
-                title(ax, "ECoG")
-            end
-            
+                function Plot_Pupil(ax, Data)
+                    plotPupilDiameter_sleepScoringSlider(ax, Data);
+                end
+
+                function Plot_Spectogram(ax, Data)
+                    plotSpectogramECOG_sleepScoringSlider(ax, Data);
+                end
+
+                function Plot_Whisker(ax, Data)
+                    plotWhiskerAngle_sleepScoringSlider(ax, Data);
+                end
+
         %% UI Controls
             % Keyboard shortcuts
                 function KeyPressHandler(~, event)
