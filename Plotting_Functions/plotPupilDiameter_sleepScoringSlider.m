@@ -1,24 +1,33 @@
-function p4 = plotPupilDiameter_sleepScoringSlider(ax, fiberdata)
+function PlotPupilDiameter(ax, Data)
+    % <Documentation>
+        % PlotPupilDiameter()
+        %   
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   
+        % Description:
+        %   
+        % Input:
+        %   
+        % Output:
+        %   
+    % <End Documentation>
 
-    %Input: procDataFileID is defined outside the function in a loop that goes through the four hours of recording
+    % Initialization
+        filteredpupildiameter = Data.Pupil.zDiameter;
 
-    % load the necessary data
-    %[animalID,fileDate,fileID] = GetFileInfo_FP(procDataFileID); % this only if we want the file name ID in the tittle of the figure (optional));
+    % Create Plot
+        plot(ax, (1:length(filteredpupildiameter))/Data.dsFs,filteredpupildiameter, ...
+            'color', [0.6 0 0], ... 
+            'LineWidth',1 ...
+            );
 
-    % Pupil data
-    filteredpupildiameter = fiberdata.Pupil.zDiameter;
+    % Plot Labels
+        ylabel(ax, 'Diameter (Z)')
+        legend(ax,'Pupil Diameter')
+        ax.Legend.AutoUpdate = 'off';
 
-    %Make the plot 
-    % ax4 = subplot(7,1,4); %Just leaving seven as original bur probably this might change 
-    p4 = plot(ax, (1:length(filteredpupildiameter))/fiberdata.dsFs,filteredpupildiameter,'color', [0.6 0 0],'LineWidth',1);
-    legend(ax, p4,'Pupil Diameter')
-    ylabel(ax, 'Diameter (Z)')
-    xlim(ax, [0,fiberdata.trialDuration_sec])
-    axis(ax, 'tight')
-
-    %optional
-    set(ax,'TickLength',[0,0])
-    set(ax,'Xticklabel',[])
-    set(ax,'box','off')
+        set(ax,'box','off')
 
 end

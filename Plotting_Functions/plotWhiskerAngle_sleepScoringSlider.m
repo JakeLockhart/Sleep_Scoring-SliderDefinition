@@ -1,28 +1,37 @@
-function p3 = plotWhiskerAngle_sleepScoringSlider(ax, fiberdata)
+function PlotWhiskerAngle(ax, Data)
+    % <Documentation>
+        % PlotWhiskerAngle()
+        %   
+        %   Created by: jsl5865
+        %   
+        % Syntax:
+        %   
+        % Description:
+        %   
+        % Input:
+        %   
+        % Output:
+        %   
+    % <End Documentation>
 
-    %Input: procDataFileID is defined outside the function in a loop that goes through the four hours of recording
+    % Initialization
+        [z1,p1,k1] = butter(4,10/(Data.dsFs/2),'low');
+        [sos1,g1] = zp2sos(z1,p1,k1);
 
-    % load the necessary data
-    %[animalID,fileDate,fileID] = GetFileInfo_FP(procDataFileID); % this only if we want the file name ID in the tittle of the figure (optional)
+        filteredWhiskerAngle = filtfilt(sos1,g1,Data.whiskerAngle);
 
-    % setup butterworth filter coefficients for a 1 Hz and 10 Hz lowpass based on the sampling rate
-    [z1,p1,k1] = butter(4,10/(fiberdata.dsFs/2),'low');
-    [sos1,g1] = zp2sos(z1,p1,k1);
 
-    % whisker angle data
-    filteredWhiskerAngle = filtfilt(sos1,g1,fiberdata.whiskerAngle);
+    % Create Plot
+        plot(ax, (1:length(filteredWhiskerAngle))/Data.dsFs,-filteredWhiskerAngle, ...
+            'color',[0.8 0.1 0.4], ...
+            'LineWidth',1 ...
+            );
 
-    %Make the plot 
-    % ax3 = subplot(7,1,3); %Just leaving seven as original bur probably this might change 
-    p3 = plot(ax, (1:length(filteredWhiskerAngle))/fiberdata.dsFs,-filteredWhiskerAngle,'color',[0.8 0.1 0.4],'LineWidth',1);
-    ylabel(ax, 'Angle (deg)')
-    xlim(ax, [0,fiberdata.trialDuration_sec])
-    legend(ax, p3,'Whisker Angle')
-    axis(ax, 'tight')
+    % Plot Labels
+        ylabel(ax, 'Angle (deg)')
+        legend(ax, 'Whisker Angle')
+        ax.Legend.AutoUpdate = 'off';
 
-    %optional
-    set(ax,'TickLength',[0,0])
-    set(ax,'Xticklabel',[])
-    set(ax,'box','off')
+        set(ax,'box','off')
 
 end
