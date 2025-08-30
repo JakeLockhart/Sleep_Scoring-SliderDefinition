@@ -55,7 +55,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
     %% Initialization
         ArousalStateList = {"Awake", "REM", "NREM"};
-        ModalityList = {'ECOG', 'EMG', 'Force', 'Pupil', 'Spectogram', 'Whisker'};
+        ModalityList = {'Force', 'EMG', 'WhiskerAngle', 'PupilDiameter', 'ECOG', 'Spectrogram'};
 
         SelectedModalities = listdlg("ListString", ModalityList, ...
                                      "SelectionMode", "multiple", ...
@@ -68,8 +68,9 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         ColorsHSV(:,3) = 0.9;
         ColorMap = hsv2rgb(ColorsHSV);
 
+        ModalityPlotFcn = cellfun(@(Modality) str2func(['Plot' Modality]), ModalityList, "UniformOutput", false);
         PlottingFunctions = containers.Map(ModalityList, ...
-                                           {@Plot_ECOG, @Plot_EMG, @Plot_Force, @Plot_Pupil, @Plot_Spectogram, @Plot_Whisker} ...
+                                           ModalityPlotFcn ...
                                           );
 
         Fields = ModalityList(SelectedModalities);
@@ -115,9 +116,8 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
             
                 xlim(ax(i), [1, SpanIndices]);
 
-                if length(fieldnames(Data)) < 3
+                if ~strcmpi(Field, 'Spectrogram')
                     YData = get(ax(i).Children, 'YData');
-                    
                     if iscell(YData)
                         YData = cell2mat(YData(:));
                     end
@@ -125,7 +125,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                     YMin = min(YData);
                     YMax = max(YData);
                     Padding = 0.1*(YMax - YMin);
-                    
+                                        
                     ylim(ax(i), [YMin-Padding, YMax+Padding]);
                 end
             end
@@ -133,7 +133,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         %% Controls
             %% Define Region Interval (Slider)
                 hold(ax(:), 'on')
-                Slider = xline(ax(1), ReferenceIndex, 'r', 'LineWidth', 3, 'HitTest', 'on', 'PickableParts', 'all');
+                Slider = xline(ax(end), ReferenceIndex, 'r', 'LineWidth', 3, 'HitTest', 'on', 'PickableParts', 'all');
                 Tolerance = 10;
                 ActiveDrag = false;
 
@@ -163,32 +163,6 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
     %% Wait for user to complete sleep scoring
         uiwait(Window);
-
-    %% Helper Functions
-        %% Plotting functions - {@Plot_ECOG, @Plot_EMG, @Plot_Force, @Plot_Pupil, @Plot_Spectogram, @Plot_Whisker}
-                function Plot_ECOG(ax, Data)
-                    plotECOG_sleepScoringSlider(ax, Data);
-                end
-
-                function Plot_EMG(ax, Data)
-                    plotEMGPower_sleepScoringSlider(ax, Data);
-                end
-
-                function Plot_Force(ax, Data)
-                    plotForceSensor_sleepScoringSlider(ax, Data);
-                end
-
-                function Plot_Pupil(ax, Data)
-                    plotPupilDiameter_sleepScoringSlider(ax, Data);
-                end
-
-                function Plot_Spectogram(ax, Data)
-                    plotSpectogramECOG_sleepScoringSlider(ax, Data);
-                end
-
-                function Plot_Whisker(ax, Data)
-                    plotWhiskerAngle_sleepScoringSlider(ax, Data);
-                end
 
         %% UI Controls
             % Keyboard shortcuts
