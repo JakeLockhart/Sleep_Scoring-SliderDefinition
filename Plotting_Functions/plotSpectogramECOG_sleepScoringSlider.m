@@ -14,11 +14,11 @@ function plotSpectogramECOG_sleepScoringSlider(ax, fiberdata)
 
     %Make the plot 
     % ax6 = subplot(7,1,[6,7]); %Just leaving seven as original bur probably this might change 
-    Semilog_ImageSC(T,F,cortical_LHnormS,'y')
+    Semilog_ImageSC(T,F,cortical_LHnormS,'y', ax)
     axis(ax, 'xy')
-    c6 = colorbar;
-    ylabel(ax, c6,'\DeltaP/P (%)')
-    caxis([-100,100])
+    c6 = colorbar(ax);
+    ylabel(c6,'\DeltaP/P (%)')
+    caxis(ax, [-100,100])
     ylabel(ax, 'Frequency (Hz)')
     % set(gca,'Yticklabel','10^1')
     yticks(ax, [1 4 8 15 30 100])
@@ -32,21 +32,24 @@ function plotSpectogramECOG_sleepScoringSlider(ax, fiberdata)
     set(ax,'Yticklabel',[])
 
     end
-    function [] = Semilog_ImageSC(x,y,C,logaxis)
+    function [] = Semilog_ImageSC(x,y,C,logaxis, ax)
     % 9/2018 Patrick Drew
     % make a surface at points x,y, of height 0 and with colors given by the matrix C
     % logaxis - which axis to plot logarithmically: 'x', 'y' or 'xy'
-    surface(x,y,zeros(size(C)),(C),'LineStyle','none');
-    q = gca;
-    q.Layer = 'top'; % put the axes/ticks on the top layer
+    % surface(ax,x,y,zeros(size(C)),(C),'LineStyle','none');
+    % q = ax;
+    % q.Layer = 'top'; % put the axes/ticks on the top layer
+
+        imagesc(ax, 'XData', x, 'YData', y, 'CData', C);
+    set(ax, 'Layer', 'top'); % keep ticks above
     if strcmp(logaxis,'y') == 1
-        set(gca,'YScale','log');
+        set(ax,'YScale','log');
     elseif strcmp(logaxis,'x') == 1
-        set(gca,'XScale','log');
+        set(ax,'XScale','log');
     elseif strcmp(logaxis,'xy') == 1
-        set(gca,'XScale','log');
-        set(gca,'YScale','log');
+        set(ax,'XScale','log');
+        set(ax,'YScale','log');
     end
-    axis xy
-    axis tight
+    axis(ax, 'xy')
+    axis(ax, 'tight')
 end
