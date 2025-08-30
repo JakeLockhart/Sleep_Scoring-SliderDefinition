@@ -133,7 +133,15 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         %% Controls
             %% Define Region Interval (Slider)
                 hold(ax(:), 'on')
-                Slider = xline(ax(end), ReferenceIndex, 'r', 'LineWidth', 3, 'HitTest', 'on', 'PickableParts', 'all');
+                Slider = gobjects(length(ax),1);
+                for idx = 1:length(ax)
+                    Slider(idx) = xline(ax(idx), ReferenceIndex, ...
+                                      'r', ...
+                                      'LineWidth', 3, ...
+                                      'HitTest','on', ...
+                                      'PickableParts','all' ...
+                                     );
+                end
                 Tolerance = 10;
                 ActiveDrag = false;
 
@@ -211,7 +219,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
             % Button Commonds
                 function DefineSleepRegion(State, Color)
-                    ActiveIndex = round(Slider.Value);
+                    ActiveIndex = round(Slider(end).Value);
                     ActiveIndex = max(1, min(MaxIndex, ActiveIndex));
 
                     Region = sort([ReferenceIndex, ActiveIndex]);
@@ -229,7 +237,10 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                     end
 
                     ReferenceIndex = ActiveIndex;
-                    Slider.Value = ReferenceIndex + 1;
+                    % Slider.Value = ReferenceIndex + 1;
+for j = 1:length(Slider)
+    Slider(j).Value = ReferenceIndex + 1;
+end
                 end
 
             % Xline motion 
@@ -241,7 +252,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
                             Slider(j).Value = CursorPosition;
                         end
                     else
-                        if abs(CursorPosition - Slider.Value) < Tolerance
+                        if abs(CursorPosition - Slider(1).Value) < Tolerance
                             Window.Pointer = 'right';
                         else
                             Window.Pointer = 'arrow';
@@ -251,7 +262,7 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
 
                 function StartMotion(~,~)
                     CursorPosition = ax(1).CurrentPoint(1,1);
-                    if abs(CursorPosition - Slider.Value) < Tolerance
+                    if abs(CursorPosition - Slider(end).Value) < Tolerance
                         ActiveDrag = true;
                     end
                 end
