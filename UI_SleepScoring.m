@@ -27,23 +27,22 @@ function SegmentedSleepStates = UI_SleepScoring(Data)
         %   Keyboard shortcuts:
         %       - 'r' used to reset x-limits to display entire sleep data series. Simply adjust the
         %         scroll wheel to re-adjust the x-limits   
-        %   Note that the input to this function must be in the form of Data.(Sensor). Currently the
-        %       following sensors can be input within the Data structure. The order does not matter, 
-        %       neither does excluding some sensor types. Each of these modalities have a corresponding
-        %       plotting function called in the helper functions section of this code. To add an 
-        %       additional modality, the PlottingFunctions variable must be updated with the data type
-        %       and the corresponding plotting function.
-        %           - EEG
-        %           - EMG
-        %           - Force
-        %           - ECOG
-        %           - Whisker
-        %           - Pupil
+        %       - 'escape' used to close the ui window.
+        %       - Numeric keys (1,2,3,...9) have been linked to the buttons which define a sleep state.
+        %         Pressing '1' is equivalent to pressing the button in the far left position. This 
+        %         is designed to work for up to 9 user defined buttons.
+        %   Note that the input to this function must be a data structure created from the io_fiber() 
+        %       which concatenates information from the ProcData structure created in the original
+        %       sleep scoring script.
+        %   This script allows users to define which modalities to display when sleep scoring, no
+        %       plotting function is dependent on the other, therefore excluding some sensor types does
+        %       not alter the output of this function. 
         %   
         % Input:
         %   Data - A structure containing one or more physiological signals. Each field should 
         %          correspond to a modality (e.g., EEG, EMG, ECoG, etc.) and must include relevant 
-        %          time and signal data.        
+        %          time and signal data. 
+        %        - Note that the input data structure is designed to accept the ouput of io_fiber()
         %   
         % Output:
         %   SegementedSleepStates - A structure containing manually defined interavals for
