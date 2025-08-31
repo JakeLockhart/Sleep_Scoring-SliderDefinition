@@ -1,16 +1,9 @@
 function PlotForce(ax, Data)
     % <Documentation>
-        % PlotForce()
-        %   
-        %   Created by: jsl5865
-        %   
-        % Syntax:
-        %   
+        % PlotWhiskerAngle()
+        %   Created by: jsl5865 & jaf6480
         % Description:
-        %   
-        % Input:
-        %   
-        % Output:
+        %   Pre-process and create a plot of the force sensor data. To be used in UI_SleepScoring().
         %   
     % <End Documentation>
 
